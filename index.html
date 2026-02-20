@@ -1,1 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎉 Team Spinner Party 🎉</title>
 
+<style>
+body {
+  margin: 0;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 5px;
+}
+
+select, button {
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  margin: 10px 5px;
+}
+
+button {
+  background: #ff6b6b;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+}
+
+.wheel-wrapper {
+  position: relative;
+  width: 90vw;
+  max-width: 320px;
+  margin: 30px auto;
+}
+
+.wheel {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  border: 8px solid white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  transition: transform 4s cubic-bezier(.17,.67,.12,.99);
+  position: relative;
+  overflow: hidden;
+}
+
+.segment {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0% 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+}
+
+.pointer {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid #333;
+  margin: 0 auto;
+}
+
+#result {
+  font-size: 20px;
+  margin-top: 20px;
+  font-weight: bold;
+  min-height: 40px;
+}
+
+.scoreboard {
+  margin-top: 20px;
+  padding: 10px;
+  background: white;
+  border-radius: 12px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.team-count {
+  margin: 5px 0;
+  font-weight: bold;
+}
+
+canvas {
+  position: fixed;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎉 Kids Team Spinner 🎉</h1>
+
+<select id="nameSelect">
+  <option value="">Select a Kid</option>
+</select>
+
+<button id="spinBtn">🎡 Spin Wheel</button>
+
+<div class="wheel-wrapper">
+  <div class="pointer"></div>
+  <div class="wheel" id="wheel"></div>
+</div>
+
+<div id="result"></div>
+
+<div class="scoreboard" id="scoreboard"></div>
+
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+/* ===============================
+   CONFIG (EDIT THIS SECTION ONLY)
+================================= */
+
+const nameToTeam = {
+  "Aarav": "Lions",
+  "Vivaan": "Tigers",
+  "Aditya": "Eagles",
+  "Krishna": "Sharks",
+  "Ishaan": "Lions",
+  "Ayaan": "Tigers",
+  "Kabir": "Eagles",
+  "Rudra": "Sharks",
+  "Arjun": "Lions",
+  "Reyansh": "Tigers",
+  "Dhruv": "Eagles",
+  "Aryan": "Sharks",
+  "Atharv": "Lions",
+  "Shaurya": "Tigers",
+  "Prateeti": "Eagles"
+};
+
+const teams = ["Lions","Tigers","Eagles","Sharks"];
+
+const teamColors = {
+  "Lions":"#e17055",
+  "Tigers":"#0984e3",
+  "Eagles":"#00b894",
+  "Sharks":"#6c5ce7"
+};
+
+/* =============================== */
+
+const wheel = document.getElementById("wheel");
+const select = document.getElementById("nameSelect");
+const spinBtn = document.getElementById("spinBtn");
+const result = document.getElementById("result");
+const scoreboard = document.getElementById("scoreboard");
+
+let counts = {};
+let isSpinning = false;
+
+teams.forEach(t => counts[t] = 0);
+
+Object.keys(nameToTeam).forEach(name => {
+  const option = document.createElement("option");
+  option.value = name;
+  option.textContent = name;
+  select.appendChild(option);
+});
+
+function updateScoreboard(){
+  scoreboard.innerHTML = "<h3>🏆 Team Counts</h3>";
+  teams.forEach(team=>{
+    scoreboard.innerHTML += `<div class="team-count" style="color:${teamColors[team]}">
+      ${team}: ${counts[team]}
+    </div>`;
+  });
+}
+
+updateScoreboard();
+
+function createWheel(){
+  const deg = 360/teams.length;
+  teams.forEach((team,i)=>{
+    const seg = document.createElement("div");
+    seg.className="segment";
+    seg.style.transform=`rotate(${i*deg}deg) skewY(-${90-deg}deg)`;
+    seg.style.background=teamColors[team];
+    seg.innerHTML=`<span style="transform:skewY(${90-deg}deg) rotate(${deg/2}deg);display:block;">${team}</span>`;
+    wheel.appendChild(seg);
+  });
+}
+
+createWheel();
+
+const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+spinBtn.addEventListener("click",()=>{
+  if(isSpinning) return;
+
+  const name = select.value;
+  if(!name){
+    alert("Select a kid first!");
+    return;
+  }
+
+  isSpinning = true;
+  spinBtn.disabled = true;
+  result.textContent = "";
+  audio.play();
+
+  const team = nameToTeam[name];
+  const index = teams.indexOf(team);
+  const deg = 360/teams.length;
+
+  const rotation = 6*360 + (360-(index*deg)-deg/2);
+  wheel.style.transform=`rotate(${rotation}deg)`;
+
+  setTimeout(()=>{
+    counts[team]++;
+    updateScoreboard();
+    result.textContent=`🎉 ${name} is in TEAM ${team}! 🎉`;
+    launchConfetti();
+    isSpinning=false;
+    spinBtn.disabled=false;
+  },4000);
+});
+
+/* CONFETTI */
+const canvas = document.getElementById("confettiCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+function launchConfetti(){
+  for(let i=0;i<150;i++){
+    ctx.fillStyle=`hsl(${Math.random()*360},100%,50%)`;
+    ctx.fillRect(Math.random()*canvas.width,
+                 Math.random()*canvas.height,
+                 5,5);
+  }
+  setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),1000);
+}
+</script>
+
+</body>
+</html>
