@@ -276,7 +276,7 @@ spinBtn.addEventListener("click", () => {
   }
 
   // Add dramatic extra spins (10 full rotations)
-  const extraSpins = 10 * 360;
+  const extraSpins = (8 + Math.floor(Math.random() * 3)) * 360;
 
   const totalRotation = currentRotation + extraSpins + rotationNeeded;
 
