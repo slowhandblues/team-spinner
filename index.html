@@ -195,15 +195,28 @@ function populateDropdown() {
 populateDropdown();
 
 // Create wheel
+let segments = [];
+
 function createWheel(){
   const deg = 360/teams.length;
   teams.forEach((team,i)=>{
     const seg = document.createElement("div");
     seg.className="segment";
+    seg.dataset.team = team; // store team name
+
     seg.style.transform=`rotate(${i*deg}deg) skewY(-${90-deg}deg)`;
     seg.style.background=teamColors[team];
-    seg.innerHTML=`<span style="transform:skewY(${90-deg}deg) rotate(${deg/2}deg);display:block;">${team}</span>`;
+
+    seg.innerHTML=`
+      <span style="
+        transform:skewY(${90-deg}deg) rotate(${deg/2}deg);
+        display:block;">
+        ${team}
+      </span>
+    `;
+
     wheel.appendChild(seg);
+    segments.push(seg); // store reference
   });
 }
 createWheel();
