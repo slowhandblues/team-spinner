@@ -312,7 +312,8 @@ spinBtn.addEventListener("click", () => {
     populateDropdown();
     updateBoard();
 
-    result.textContent = `🎉 ${name} is in TEAM ${team}! 🎉`;
+    //result.textContent = `🎉 ${name} is in TEAM ${team}! 🎉`;
+    result.innerHTML = `🎉 <u>${name}</u> is in TEAM <u>${team}</u>! 🎉`;
     launchConfetti();
 
     isSpinning = false;
