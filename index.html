@@ -1,1 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎉 Kids Team Spinner 🎉</title>
 
+<style>
+body {
+  margin: 0;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+  text-align: center;
+  padding: 20px;
+}
+
+h1 { margin-bottom: 5px; }
+
+select, button {
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  margin: 8px;
+}
+
+button {
+  background: #ff6b6b;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+}
+
+.wheel-wrapper {
+  position: relative;
+  width: 90vw;
+  max-width: 320px;
+  margin: 30px auto;
+}
+
+.wheel {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  border: 8px solid white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  transition: transform 4s cubic-bezier(.17,.67,.12,.99);
+  position: relative;
+  overflow: hidden;
+}
+
+.segment {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0% 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+}
+
+.pointer {
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid #333;
+  margin: 0 auto;
+}
+
+#result {
+  font-size: 20px;
+  margin-top: 20px;
+  font-weight: bold;
+  min-height: 40px;
+}
+
+.team-board {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+  gap: 10px;
+}
+
+.team-card {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.team-card h3 {
+  margin: 5px 0;
+}
+
+canvas {
+  position: fixed;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎉 Kids Team Spinner 🎉</h1>
+
+<select id="nameSelect">
+  <option value="">Select a Kid</option>
+</select>
+
+<button id="spinBtn">🎡 Spin</button>
+<button id="resetBtn" style="background:#555;">🔄 Reset</button>
+
+<div class="wheel-wrapper">
+  <div class="pointer"></div>
+  <div class="wheel" id="wheel"></div>
+</div>
+
+<div id="result"></div>
+
+<div class="team-board" id="teamBoard"></div>
+
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+/* ================= CONFIG ================= */
+
+const nameToTeam = {
+  "Aadhya":"Agent Red Fox",
+  "Abritti":"Agent Blue Hawk",
+  "Ananya":"Agent Red Fox",
+  "Chitrakshi":"Agent Blue Hawk",
+  "Ishaan":"Agent Black Panther",
+  "Kanishk":"Agent Black Panther",
+  "Mihira":"Agent Red Fox",
+  "Nishikha":"Agent Green Cobra",
+  "Oorja":"Agent Blue Hawk",
+  "Prateeti":"Agent Blue Hawk",
+  "Sahasra":"Agent Green Cobra",
+  "Shreya":"Agent Red Fox",
+  "Sreenidhi":"Agent Green Cobra",
+  "Tia":"Agent Green Cobra",
+  "Ujaan":"Agent Black Panther",
+  "Ved":"Agent Black Panther",
+  "Vihaan":"Agent Black Panther"
+};
+
+const teams = ["Agent Red Fox","Agent Blue Hawk","Agent Green Cobra","Agent Black Panther"];
+
+const teamColors = {
+  "Agent Red Fox":"#e17055",
+  "Agent Blue Hawk":"#0984e3",
+  "Agent Green Cobra":"#00b894",
+  "Agent Black Panther":"#6c5ce7"
+};
+
+/* =========================================== */
+
+const wheel = document.getElementById("wheel");
+const select = document.getElementById("nameSelect");
+const spinBtn = document.getElementById("spinBtn");
+const result = document.getElementById("result");
+const teamBoard = document.getElementById("teamBoard");
+const resetBtn = document.getElementById("resetBtn");
+
+let isSpinning = false;
+let assignedKids = {};
+let teamMembers = {};
+
+teams.forEach(t => teamMembers[t] = []);
+
+// Populate dropdown
+function populateDropdown() {
+  select.innerHTML = `<option value="">Select a Kid</option>`;
+  Object.keys(nameToTeam).forEach(name => {
+    if (!assignedKids[name]) {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    }
+  });
+}
+populateDropdown();
+
+// Create wheel
+function createWheel(){
+  const deg = 360/teams.length;
+  teams.forEach((team,i)=>{
+    const seg = document.createElement("div");
+    seg.className="segment";
+    seg.style.transform=`rotate(${i*deg}deg) skewY(-${90-deg}deg)`;
+    seg.style.background=teamColors[team];
+    seg.innerHTML=`<span style="transform:skewY(${90-deg}deg) rotate(${deg/2}deg);display:block;">${team}</span>`;
+    wheel.appendChild(seg);
+  });
+}
+createWheel();
+
+// Update Team Display
+function updateBoard(){
+  teamBoard.innerHTML = "";
+  teams.forEach(team=>{
+    const card = document.createElement("div");
+    card.className = "team-card";
+    card.innerHTML = `
+      <h3 style="color:${teamColors[team]}">${team} (${teamMembers[team].length})</h3>
+      ${teamMembers[team].map(n=>`<div>${n}</div>`).join("")}
+    `;
+    teamBoard.appendChild(card);
+  });
+}
+updateBoard();
+
+// Sound
+const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+// Spin Logic
+spinBtn.addEventListener("click",()=>{
+  if(isSpinning) return;
+
+  const name = select.value;
+  if(!name){
+    alert("Select a kid first!");
+    return;
+  }
+
+  isSpinning = true;
+  spinBtn.disabled = true;
+  result.textContent = "";
+  audio.play();
+
+  const team = nameToTeam[name];
+  const index = teams.indexOf(team);
+  const deg = 360/teams.length;
+  const rotation = 6*360 + (360-(index*deg)-deg/2);
+
+  wheel.style.transform=`rotate(${rotation}deg)`;
+
+  setTimeout(()=>{
+    assignedKids[name] = true;
+    teamMembers[team].push(name);
+    populateDropdown();
+    updateBoard();
+
+    result.textContent=`🎉 ${name} is in TEAM ${team}! 🎉`;
+    launchConfetti();
+
+    isSpinning=false;
+    spinBtn.disabled=false;
+  },4000);
+});
+
+// Reset
+resetBtn.addEventListener("click",()=>{
+  assignedKids = {};
+  teamMembers = {};
+  teams.forEach(t => teamMembers[t] = []);
+  populateDropdown();
+  updateBoard();
+  result.textContent="";
+  wheel.style.transform="rotate(0deg)";
+});
+
+// Confetti
+const canvas = document.getElementById("confettiCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+function launchConfetti(){
+  for(let i=0;i<150;i++){
+    ctx.fillStyle=`hsl(${Math.random()*360},100%,50%)`;
+    ctx.fillRect(Math.random()*canvas.width,
+                 Math.random()*canvas.height,
+                 6,6);
+  }
+  setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),1000);
+}
+</script>
+
+</body>
+</html>
