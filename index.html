@@ -227,6 +227,8 @@ updateBoard();
 const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
 // Spin Logic
+let currentRotation = 0;
+
 spinBtn.addEventListener("click", () => {
   if (isSpinning) return;
 
@@ -246,23 +248,28 @@ spinBtn.addEventListener("click", () => {
 
   const segmentAngle = 360 / teams.length;
 
-  // 🎯 Calculate exact center angle of selected segment
-  const targetAngle = (index * segmentAngle) + (segmentAngle / 2);
+  // 🎯 Center of selected segment
+  const targetAngle = index * segmentAngle + segmentAngle / 2;
 
-  // 🎡 Dramatic spins (8–10 full rotations)
-  const extraSpins = (8 + Math.floor(Math.random() * 3)) * 360;
+  // Normalize current rotation between 0–360
+  const normalizedCurrent = currentRotation % 360;
 
-  // Final angle so selected team center hits pointer (0deg top)
-  const finalAngle = extraSpins + (360 - targetAngle);
+  // Calculate how much more to rotate so target hits 0° (pointer top)
+  let rotationNeeded = 360 - targetAngle - normalizedCurrent;
 
-  // Reset rotation first (important for multiple spins)
-  wheel.style.transition = "none";
-  wheel.style.transform = "rotate(0deg)";
-  
-  setTimeout(() => {
-    wheel.style.transition = "transform 5.5s cubic-bezier(.17,.67,.12,.99)";
-    wheel.style.transform = `rotate(${finalAngle}deg)`;
-  }, 50);
+  if (rotationNeeded < 0) {
+    rotationNeeded += 360;
+  }
+
+  // Add dramatic extra spins (10 full rotations)
+  const extraSpins = 10 * 360;
+
+  const totalRotation = currentRotation + extraSpins + rotationNeeded;
+
+  wheel.style.transition = "transform 6s cubic-bezier(.17,.67,.12,.99)";
+  wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+  currentRotation = totalRotation;
 
   setTimeout(() => {
     assignedKids[name] = true;
@@ -275,7 +282,7 @@ spinBtn.addEventListener("click", () => {
 
     isSpinning = false;
     spinBtn.disabled = false;
-  }, 5600);
+  }, 6000);
 });
   
 // Reset
