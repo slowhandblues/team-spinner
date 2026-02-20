@@ -241,6 +241,7 @@ updateBoard();
 const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
 // Spin Logic
+// Spin Logic
 let currentRotation = 0;
 
 spinBtn.addEventListener("click", () => {
@@ -259,31 +260,29 @@ spinBtn.addEventListener("click", () => {
 
   const team = nameToTeam[name];
   const index = teams.indexOf(team);
+  const totalSegments = teams.length;
 
-  const segmentAngle = 360 / teams.length;
+  const segmentAngle = 360 / totalSegments;
 
-  // 🎯 Center of selected segment
-  const targetAngle = index * segmentAngle + segmentAngle / 2;
+  // 🎯 Exact center of selected slice
+  const segmentCenter = index * segmentAngle + segmentAngle / 2;
 
-  // Normalize current rotation between 0–360
+  // Normalize current rotation to 0–360
   const normalizedCurrent = currentRotation % 360;
 
-  // Calculate how much more to rotate so target hits 0° (pointer top)
-  let rotationNeeded = 360 - targetAngle - normalizedCurrent;
+  // 🧮 Calculate rotation needed so selected slice center lands at 0° (top pointer)
+  let rotationNeeded = (360 - segmentCenter - normalizedCurrent) % 360;
+  if (rotationNeeded < 0) rotationNeeded += 360;
 
-  if (rotationNeeded < 0) {
-    rotationNeeded += 360;
-  }
-
-  // Add dramatic extra spins (10 full rotations)
+  // 🎡 Add dramatic extra spins (8–10 rotations)
   const extraSpins = (8 + Math.floor(Math.random() * 3)) * 360;
 
-  const totalRotation = currentRotation + extraSpins + rotationNeeded;
+  const finalRotation = currentRotation + extraSpins + rotationNeeded;
 
   wheel.style.transition = "transform 6s cubic-bezier(.17,.67,.12,.99)";
-  wheel.style.transform = `rotate(${totalRotation}deg)`;
+  wheel.style.transform = `rotate(${finalRotation}deg)`;
 
-  currentRotation = totalRotation;
+  currentRotation = finalRotation;
 
   setTimeout(() => {
     assignedKids[name] = true;
