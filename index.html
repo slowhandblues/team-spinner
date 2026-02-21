@@ -69,7 +69,6 @@ button:disabled {
   padding-left: 12px;          /* 🔥 spacing from edge */
   font-weight: bold;
   color: white;
-  font-size: 14px;
   text-align: left;            /* 🔥 ensure left text alignment */
 }
 
@@ -237,18 +236,30 @@ function createWheel(){
     seg.style.transform=`rotate(${i*deg}deg) skewY(-${90-deg}deg)`;
     seg.style.background=teamColors[team];
 
-    seg.innerHTML=`
-      <span style="
-        transform:skewY(${90-deg}deg) rotate(${deg/2}deg);
-        display:block;
-        width:100%;
-      ">
-        ${team}
-      </span>
-    `;
+    const span = document.createElement("span");
 
+    span.style.transform = `skewY(${90-deg}deg) rotate(${deg/2}deg)`;
+    span.style.display = "block";
+    span.style.width = "100%";
+    span.style.whiteSpace = "nowrap";
+
+    span.textContent = team;
+
+    seg.appendChild(span);
     wheel.appendChild(seg);
     segments.push(seg);
+
+    // 🔥 AUTO FONT SCALE LOGIC
+    const baseWidth = 160; // approximate slice usable width
+    const textLength = team.length;
+
+    // calculate font size dynamically
+    let fontSize = baseWidth / textLength * 1.4;
+
+    // clamp min/max size
+    fontSize = Math.max(11, Math.min(fontSize, 18));
+
+    span.style.fontSize = fontSize + "px";
   });
 }
 createWheel();
