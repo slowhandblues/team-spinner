@@ -65,10 +65,12 @@ button:disabled {
   transform-origin: 0% 0%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* 🔥 LEFT ALIGN */
+  padding-left: 12px;          /* 🔥 spacing from edge */
   font-weight: bold;
   color: white;
   font-size: 14px;
+  text-align: left;            /* 🔥 ensure left text alignment */
 }
 
 /* 🔥 Internal winning slice glow */
@@ -135,7 +137,7 @@ canvas {
 
 <body>
 
-<h1>🎉 Kids Team Spinner 🎉</h1>
+<h1>🎉 Kids Team Spinner 1 🎉</h1>
 
 <select id="nameSelect">
   <option value="">Select a Kid</option>
@@ -167,13 +169,13 @@ const nameToTeam = {
   "Kanishk":"Agent Black Panther",
   "Mihira":"Agent Red Fox",
   "Nishikha":"Agent Green Cobra",
-  "Oorja":"Agent Blue Hawk",
+  "Oorja":"Agent Red Fox",
   "Prateeti":"Agent Blue Hawk",
   "Sahasra":"Agent Green Cobra",
   "Shreya":"Agent Red Fox",
   "Sreenidhi":"Agent Green Cobra",
   "Tia":"Agent Green Cobra",
-  "Ujaan":"Agent Black Panther",
+  "Ujaan":"Agent Blue Hawk",
   "Ved":"Agent Black Panther",
   "Vihaan":"Agent Black Panther"
 };
@@ -238,7 +240,9 @@ function createWheel(){
     seg.innerHTML=`
       <span style="
         transform:skewY(${90-deg}deg) rotate(${deg/2}deg);
-        display:block;">
+        display:block;
+        width:100%;
+      ">
         ${team}
       </span>
     `;
